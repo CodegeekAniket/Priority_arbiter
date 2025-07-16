@@ -24,11 +24,11 @@ Arbiters are essential in digital systems where **multiple masters compete for a
 
 | File                         | Description                                         |
 |------------------------------|-----------------------------------------------------|
-| `fixed_priority_arbiter.v`  | 4-input fixed-priority arbiter (req[0] is highest)  |
+| `fixed_arbiter.v`           | 4-input fixed-priority arbiter (req[0] is highest)  |
 | `round_robin_arbiter.v`     | Round-robin arbiter for 4 masters                   |
 | `round_robin_arbiter_n.v`   | Parameterized round-robin arbiter (any `N`)     |
-| `arbiter_tb.v`              | Testbench validating correct and fair grant logic   |
-| `bus_system.v` (optional)   | Top module showing how arbiter connects to bus      |
+| `test_bench.v`              | Testbench validating correct and fair grant logic   |
+| `bus_system.v`              | Top module showing how arbiter connects to bus      |
 
 ---
 
@@ -60,5 +60,14 @@ Arbiters are essential in digital systems where **multiple masters compete for a
 - 🧪 Thorough simulation support
 - 🧠 Clean and modular code structure
 
+---
+## 🔧 Synthesis Information
+
+- 🛠 Target: Spartan-7  (Vivado tested)
+- ⌛ Registers: `log2(N)` bits for tracking pointer
+- 🧮 Logic: Combinational priority encoders, AND/OR gates
+- 🔐 Output: Safe, one-hot `grant` line for multiplexer/bus control
+
+---
 
 
