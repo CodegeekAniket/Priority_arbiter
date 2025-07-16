@@ -1,0 +1,16 @@
+module fixed_priority_arbiter(
+        input [3:0] req_a,
+        output [3:0] grant_a
+    );
+    //Assuming Priority order as r0 > r1 > r2 > r3
+    reg [3:0] grant;
+    assign grant_a = grant;
+    always @(*)
+        begin 
+            if (req_a[0]) grant = 4'b0001;
+            else if (req_a[1]) grant = 4'b0010;
+            else if (req_a[2]) grant = 4'b0100;
+            else if (req_a[3]) grant = 4'b1000;
+            else grant = 4'b0000;
+        end 
+endmodule
