@@ -1,0 +1,43 @@
+module round_robin_n #(
+    parameter N = 4  
+)(
+    input wire clk,
+    input wire rst,
+    input wire [N-1:0] req,
+    output reg [N-1:0] grant
+);
+
+    reg [$clog2(N)-1:0] last_grant;
+
+    integer i;
+
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            last_grant <= N - 1;  // So first grant is 0
+        end else begin
+            begin : for1
+            for (i = 1; i <= N; i = i + 1) begin
+                if (req[(last_grant + i) % N]) begin
+                    last_grant <= (last_grant + i) % N;
+                    disable for1;  // Exit after first match
+                end
+            end
+            end
+        end
+    end
+
+    // Generate one-hot grant based on current last_grant
+    always @(*) begin
+        grant = {N{1'b0}};
+        begin : for2
+        for (i = 1; i <= N; i = i + 1) begin
+            if (req[(last_grant + i) % N]) begin
+                grant[(last_grant + i) % N] = 1'b1;
+                disable for2;
+            end
+        end
+        end
+    end
+
+endmodule
