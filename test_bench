@@ -1,0 +1,51 @@
+module test_bus;
+
+    reg clk, rst;
+    reg [3:0] req;
+    reg [127:0] master_data_in;
+    wire [3:0] grant;
+    wire [31:0] bus_data_out;
+
+    initial clk = 0;
+    always #5 clk = ~clk;
+
+    // DUT: bus system using round-robin arbiter
+    bus_system uut (
+        .clk(clk),
+        .rst(rst),
+        .req(req),
+        .master_data_flat(master_data_in),
+        .grant(grant),
+        .bus_data_out(bus_data_out)
+    );
+
+    
+    initial begin
+        $display("Time\tReq\tGrant\t\tBus_Data");
+        $monitor("%0t\t%b\t%b\t%h", $time, req, grant, bus_data_out);
+
+        rst = 1; req = 4'b0000;
+        
+        master_data_in = 128'hAAAA0001BBBB0002CCCC0003DDDD0004;
+
+        #12; rst = 0;
+
+        // Single requester at a time
+        req = 4'b0001; #10;
+        req = 4'b0010; #10;
+        req = 4'b0100; #10;
+        req = 4'b1000; #10;
+
+        // Multiple requesters — should rotate
+        req = 4'b1111; #50;
+
+        // Back to single request
+        req = 4'b0100; #10;
+
+        // No request
+        req = 4'b0000; #10;
+
+        $finish;
+    end
+
+endmodule
