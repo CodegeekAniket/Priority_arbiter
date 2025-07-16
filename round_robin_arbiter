@@ -1,0 +1,63 @@
+module round_robin_arbiter (
+    input clk,
+    input rst,
+    input  [3:0] req,
+    output reg [3:0] grant
+);
+    parameter M0 = 2'b00 , M1 = 2'b01 , M2 = 2'b10 , M3 = 2'b11;
+    reg [1:0] last_grant; // Stores last granted request (pointer)
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            last_grant <= M3; // Start from last , so 0 is first
+        end else begin
+            case (last_grant)
+                M0:    if (req[1]) last_grant <= M1;
+                       else if (req[2]) last_grant <= M2;
+                       else if (req[3]) last_grant <= M3;
+                       else if (req[0]) last_grant <= M0;
+
+                M1:    if (req[2]) last_grant <= M2;
+                       else if (req[3]) last_grant <= M3;
+                       else if (req[0]) last_grant <= M0;
+                       else if (req[1]) last_grant <= M1;
+
+                M2:    if (req[3]) last_grant <= M3;
+                       else if (req[0]) last_grant <= M0;
+                       else if (req[1]) last_grant <= M1;
+                       else if (req[2]) last_grant <= M2;
+
+                M3:    if (req[0]) last_grant <= M0;
+                       else if (req[1]) last_grant <= M1;
+                       else if (req[2]) last_grant <= M2;
+                       else if (req[3]) last_grant <= M3;
+            endcase
+        end
+    end
+
+    // Output logic based on last_grant pointer
+    always @(*) begin
+        case (last_grant)
+            M0:    if (req[1]) grant = 4'b0010;
+                   else if (req[2]) grant = 4'b0100;
+                   else if (req[3]) grant = 4'b1000;
+                   else if (req[0]) grant = 4'b0001;
+
+            M1:    if (req[2]) grant = 4'b0100;
+                   else if (req[3]) grant = 4'b1000;
+                   else if (req[0]) grant = 4'b0001;
+                   else if (req[1]) grant = 4'b0010;
+
+            M2:    if (req[3]) grant = 4'b1000;
+                   else if (req[0]) grant = 4'b0001;
+                   else if (req[1]) grant = 4'b0010;
+                   else if (req[2]) grant = 4'b0100;
+
+            M3:    if (req[0]) grant = 4'b0001;
+                   else if (req[1]) grant = 4'b0010;
+                   else if (req[2]) grant = 4'b0100;
+                   else if (req[3]) grant = 4'b1000;
+        endcase
+    end
+
+endmodule
