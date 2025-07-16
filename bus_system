@@ -1,0 +1,32 @@
+module bus_system (
+    input clk,rst,
+    input  [3:0] req,             // Request lines from 4 masters
+    input  [127:0] master_data_flat,   // Data from each master
+    output [31:0] bus_data_out,   // Output to slave
+    output [3:0] grant            // Grant signals to masters
+);
+
+
+    wire [31:0] master_data_in [3:0];
+    // Split the flat bus into an array of 32-bit wires
+    assign master_data_in[0] = master_data_flat[31:0];
+    assign master_data_in[1] = master_data_flat[63:32];
+    assign master_data_in[2] = master_data_flat[95:64];
+    assign master_data_in[3] = master_data_flat[127:96];
+    
+
+
+    round_robin_arbiter arb2 (.clk(clk),.rst(rst),.req(req),.grant(grant));
+
+
+    // MUX: select the master's data based on grant
+    assign bus_data_out =
+        grant[0] ? master_data_in[0] :
+        grant[1] ? master_data_in[1] :
+        grant[2] ? master_data_in[2] :
+        grant[3] ? master_data_in[3] :
+        32'b0;
+        
+        
+
+endmodule
